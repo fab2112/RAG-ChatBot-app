@@ -1,0 +1,52 @@
+# RAG-ChatBot-app
+
+services:
+  chatrag:
+    container_name: chatrag
+    build: .
+    image: chatrag
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - qdrant
+      - chromadb
+    networks:
+      - system_net
+    ports:
+      - 7860:7860
+    extra_hosts:
+      - "localhost:host-gateway"
+
+  chromadb:
+    container_name: chromadb
+    image: chromadb/chroma:latest
+    networks:
+      - system_net
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - chroma-data:/data
+
+  qdrant:
+    container_name: qdrant
+    image: qdrant/qdrant:latest
+    networks:
+      - system_net
+    restart: always
+    ports:
+      - 6333:6333
+      - 6334:6334
+    volumes:
+      - qdrant-storage:/qdrant/storage
+
+networks:
+  system_net:
+    driver: bridge
+
+volumes:
+  chroma-data:
+    external: False
+  qdrant-storage:
+    external: False
